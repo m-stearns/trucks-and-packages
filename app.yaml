@@ -1,0 +1,2 @@
+runtime: python38
+entrypoint: gunicorn -b :$PORT -w 2 wsgi:app
