@@ -1,0 +1,49 @@
+h1, h2, h3, p {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#authorization-header {
+    font-size: small;
+    font-style: italic;
+}
+
+.preformatted {
+    font-family: monospace;
+    white-space: pre-wrap;
+    background-color: rgb(59, 68, 65);
+    padding: 3%;
+    color: beige;
+}
+
+article {
+    margin-left: 150px;
+    margin-right: 150px;
+    word-wrap: break-word;
+}
+
+nav {
+    background-color: #333;
+    margin: 0px;
+    overflow: hidden;
+}
+
+nav ul {
+    margin: 0px;
+    padding: 0px;
+}
+
+nav > ul > li > a {
+    color: rgb(196, 194, 194);
+    display: block;
+    line-height: 15px;
+    padding: 15px 15px;
+    text-decoration: none;
+}
+
+a {
+    text-decoration: none;
+}
+
+#bearer {
+    color:rgb(116, 35, 190);
+}
