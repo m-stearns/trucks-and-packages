@@ -2,7 +2,7 @@ import json
 
 from flask import Flask, render_template, session
 
-from trucksanditems import auth, config
+from trucksandpackages import auth, config
 
 app = Flask(__name__)
 app.config.from_object(config.DevelopmentConfig())

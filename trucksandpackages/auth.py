@@ -6,7 +6,7 @@ import flask
 from authlib.integrations.flask_client import OAuth
 from jose import jwt
 
-from trucksanditems import exceptions
+from trucksandpackages import exceptions
 
 bp = flask.Blueprint("auth", __name__, url_prefix="/auth")
 
