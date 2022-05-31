@@ -2,9 +2,9 @@ from typing import List
 
 from google.cloud import datastore
 from trucksandpackages.domain import model
+from trucksandpackages.repositories.abstract_repository import AbstractRepository
 
-
-class TruckRepository:
+class TruckRepository(AbstractRepository):
 
     def __init__(
         self,
@@ -63,6 +63,12 @@ class TruckRepository:
             return truck
         else:
             return None
+
+    def get_list(self):
+        pass
+
+    def remove(self):
+        pass
 
     def __get_package_by_id(self, package_id: str) -> model.Package:
         key = self.client_session.key("packages", int(package_id))
