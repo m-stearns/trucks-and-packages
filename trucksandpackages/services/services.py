@@ -59,11 +59,14 @@ def edit_truck(
     truck_type: str,
     truck_length: int,
     axles: int,
-    unit_of_work: DatastoreUnitOfWork
+    unit_of_work: DatastoreUnitOfWork,
+    clear_package_ids: bool = False,
 ):
     with unit_of_work:
         truck.truck_type = truck_type if truck_type else truck.truck_type
         truck.truck_length = truck_length if truck_length else truck.truck_length
         truck.axles = axles if axles else truck.axles
+        if clear_package_ids:
+            truck.package_ids = set()
         unit_of_work.trucks.add(truck)
         unit_of_work.commit()

@@ -72,18 +72,18 @@ def create_truck():
             response_400_error.status_code = 400
             return response_400_error
         
-        type = json_data["type"]
+        truck_type = json_data["type"]
         length = json_data["length"]
         axles = json_data["axles"]
         auth_id = payload["sub"]
 
         truck_id = services.create_truck(
-            type, length, axles, auth_id, unit_of_work.DatastoreUnitOfWork()
+            truck_type, length, axles, auth_id, unit_of_work.DatastoreUnitOfWork()
         )
         res = make_response(
             jsonify({
                 "id": truck_id,
-                "type": type,
+                "type": truck_type,
                 "length": length,
                 "axles": axles,
                 "packages": [],
@@ -95,7 +95,7 @@ def create_truck():
         return res
 
 
-@bp.route("/<truck_id>", methods=["GET", "PATCH"])
+@bp.route("/<truck_id>", methods=["GET", "PATCH", "PUT"])
 def get_or_update_truck(truck_id: str):
     if request.method == "GET":
         try:
@@ -125,7 +125,9 @@ def get_or_update_truck(truck_id: str):
             return response_404_error
             
         elif truck.owner != auth_id:
-            return "Bad stuff bro", 400
+            response_403_error = make_response()
+            response_403_error.status_code = 403
+            return response_403_error
         else:
             response_200 = jsonify(
                 truck_to_dict(
@@ -191,6 +193,77 @@ def get_or_update_truck(truck_id: str):
                 response_200.status_code = 200
                 return response_200
 
+            else:
+                response_403_error = make_response()
+                response_403_error.status_code = 403
+                return response_403_error
+
+        else:
+            response_404_error = make_response(
+                jsonify({
+                    "Error": "No truck with this truck_id exists"
+                })
+            )
+            response_404_error.status_code = 404
+            return response_404_error
+
+    elif request.method == "PUT":
+        try:
+            payload = auth.verify_jwt(request)
+        except (exceptions.NoAuthHeaderError, exceptions.InvalidHeaderError) as e:
+            response_401_error = make_response(e.error)
+            response_401_error.status_code = e.status_code
+            return response_401_error
+
+        response_415_error = common.check_for_content_type_error_415(request)
+        if response_415_error:
+            return response_415_error
+
+        response_406_error = common.check_for_accept_error_406(
+            request, ["application/json"]
+        )
+        if response_406_error:
+            return response_406_error
+
+        json_data = request.get_json()
+        if not json_data or not has_required_values_for_create_truck(json_data) \
+            or contains_unallowed_attributes(json_data):
+            response_400_error = make_response({
+                "Error": "The request object is missing all of the required attributes"
+            })
+            response_400_error.status_code = 400
+            return response_400_error
+
+        auth_id = payload["sub"]
+        truck = services.get_truck(
+            truck_id, unit_of_work.DatastoreUnitOfWork()
+        )
+        if truck:
+            if truck.owner == auth_id:
+                truck_type = json_data["type"]
+                length = json_data["length"]
+                axles = json_data["axles"]
+                services.edit_truck(
+                    truck,
+                    truck_type,
+                    length,
+                    axles,
+                    unit_of_work.DatastoreUnitOfWork(),
+                    clear_package_ids=True,
+                )
+                response_200 = jsonify(
+                    truck_to_dict(
+                        truck,
+                        f"{request.base_url}",
+                        create_list_of_package_dict(truck.package_ids, f"{request.host_url}packages")
+                    )
+                )
+                response_200.status_code = 200
+                return response_200
+            else:
+                response_403_error = make_response()
+                response_403_error.status_code = 403
+                return response_403_error
         else:
             response_404_error = make_response(
                 jsonify({

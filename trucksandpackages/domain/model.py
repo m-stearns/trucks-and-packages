@@ -125,6 +125,10 @@ class Truck:
     @property
     def package_ids(self) -> Set[str]:
         return self._package_ids
+    
+    @package_ids.setter
+    def package_ids(self, package_ids: Set[str]):
+        self._package_ids = package_ids
 
     def has_packages(self):
         return len(self._package_ids) > 0
