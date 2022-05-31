@@ -1,6 +1,6 @@
 from flask import Flask, render_template, session
 
-from trucksandpackages import auth, config, trucks
+from trucksandpackages import auth, config, trucks, truckmanagers
 
 app = Flask(__name__)
 app.config.from_object(config.DevelopmentConfig())
@@ -9,6 +9,7 @@ auth.register_to_auth0(app)
 
 app.register_blueprint(auth.bp)
 app.register_blueprint(trucks.bp)
+app.register_blueprint(truckmanagers.bp)
 
 @app.route("/")
 def home():
