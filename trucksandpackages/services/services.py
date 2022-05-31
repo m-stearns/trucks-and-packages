@@ -55,10 +55,15 @@ def get_truck(truck_id: str, unit_of_work: DatastoreUnitOfWork) -> model.Truck:
             return None
 
 def edit_truck(
-    truck_id: str,
+    truck: model.Truck,
     truck_type: str,
     truck_length: int,
     axles: int,
     unit_of_work: DatastoreUnitOfWork
 ):
-    pass
+    with unit_of_work:
+        truck.truck_type = truck_type if truck_type else truck.truck_type
+        truck.truck_length = truck_length if truck_length else truck.truck_length
+        truck.axles = axles if axles else truck.axles
+        unit_of_work.trucks.add(truck)
+        unit_of_work.commit()

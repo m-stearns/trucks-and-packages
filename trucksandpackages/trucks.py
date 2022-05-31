@@ -95,7 +95,7 @@ def create_truck():
         return res
 
 
-@bp.route("/<truck_id>", methods=["GET"])
+@bp.route("/<truck_id>", methods=["GET", "PATCH"])
 def get_or_update_truck(truck_id: str):
     if request.method == "GET":
         try:
@@ -116,13 +116,13 @@ def get_or_update_truck(truck_id: str):
             truck_id, unit_of_work.DatastoreUnitOfWork()
         )
         if not truck:
-            response_400_error = make_response(
+            response_404_error = make_response(
                 jsonify({
                     "Error": "No truck with this truck_id exists"
                 })
             )
-            response_400_error.status_code = 400
-            return response_400_error
+            response_404_error.status_code = 404
+            return response_404_error
             
         elif truck.owner != auth_id:
             return "Bad stuff bro", 400
@@ -166,15 +166,36 @@ def get_or_update_truck(truck_id: str):
                 "Content-Type", "application/json"
             )
             return response_400_error
+        
+        auth_id = payload["sub"]
+        truck = services.get_truck(truck_id, unit_of_work.DatastoreUnitOfWork())
+        if truck:
+            if truck.owner == auth_id:
+                truck_type = json_data.get("type", None)
+                truck_length = json_data.get("length", None)
+                axles = json_data.get("axles", None)
+                services.edit_truck(
+                    truck,
+                    truck_type,
+                    truck_length,
+                    axles,
+                    unit_of_work.DatastoreUnitOfWork()
+                )
+                response_200 = jsonify(
+                    truck_to_dict(
+                        truck,
+                        f"{request.base_url}",
+                        create_list_of_package_dict(truck.package_ids, f"{request.host_url}packages")
+                    )
+                )
+                response_200.status_code = 200
+                return response_200
 
-        truck_type = json_data.get("type", None)
-        truck_length = json_data.get("length", None)
-        axles = json_data.get("axles", None)
-
-        result = services.edit_truck(
-            truck_id,
-            truck_type,
-            truck_length,
-            axles,
-            unit_of_work.DatastoreUnitOfWork()
-        )
+        else:
+            response_404_error = make_response(
+                jsonify({
+                    "Error": "No truck with this truck_id exists"
+                })
+            )
+            response_404_error.status_code = 404
+            return response_404_error
