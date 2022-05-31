@@ -1,4 +1,5 @@
 import json
+from typing import List
 from urllib.parse import quote_plus, urlencode
 from urllib.request import urlopen
 
@@ -7,6 +8,8 @@ from authlib.integrations.flask_client import OAuth
 from jose import jwt
 
 from trucksandpackages import exceptions
+from trucksandpackages.services import services, unit_of_work
+from trucksandpackages.domain import model
 
 bp = flask.Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -119,7 +122,11 @@ def verify_jwt(request):
             401
         )
 
-
+def user_already_saved(auth_id: str, users: List[model.User]) -> bool:
+    for user in users:
+        if user.auth_id == auth_id:
+            return True
+    return False
 
 @bp.route("/login")
 def login():
@@ -132,6 +139,14 @@ def login():
 def callback():
     oauth = flask.current_app.config["oauth"]
     token = oauth.auth0.authorize_access_token()
+
+    auth_id = token["userinfo"]["sub"]
+    users = services.get_all_truck_managers(unit_of_work.DatastoreUnitOfWork())
+    if not user_already_saved(auth_id, users):
+        services.create_truck_manager(
+            auth_id, unit_of_work.DatastoreUnitOfWork()
+        )
+    
     flask.session["user"] = token
     return flask.redirect("/")
 
