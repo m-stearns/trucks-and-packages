@@ -16,3 +16,11 @@ def create_truck(
         unit_of_work.commit()
         truck_id = unit_of_work.trucks.id_of_added_entity
         return truck_id
+
+def get_truck(truck_id: str, unit_of_work: DatastoreUnitOfWork):
+    with unit_of_work:
+        truck = unit_of_work.trucks.get(truck_id)
+        if truck:
+            return truck
+        else:
+            return None
