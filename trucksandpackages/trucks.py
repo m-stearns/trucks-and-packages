@@ -1,4 +1,3 @@
-from re import T
 from typing import List, Set
 from flask import Blueprint, jsonify, make_response, request
 
