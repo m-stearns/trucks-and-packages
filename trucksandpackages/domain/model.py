@@ -147,9 +147,22 @@ class Truck:
 
 class User:
 
-    def __init__(self, user_id: str, trucks: List[Truck] = None):
+    def __init__(
+        self,
+        auth_id: str,
+        user_id: str = None,
+    ):
+        self._auth_id = auth_id
         self._user_id = user_id
-        self._trucks: Set[Truck] = trucks
+        self._trucks: Set[Truck] = set()
+
+    @property
+    def auth_id(self) -> str:
+        return self._auth_id
+
+    @auth_id.setter
+    def auth_id(self, auth_id: str):
+        self._auth_id = auth_id
 
     @property
     def user_id(self) -> str:
@@ -158,6 +171,14 @@ class User:
     @user_id.setter
     def user_id(self, user_id: str):
         self._user_id = user_id
+
+    @property
+    def trucks(self) -> Set[Truck]:
+        return self._trucks
+
+    @trucks.setter
+    def trucks(self, trucks: Set[Truck]):
+        self._trucks = trucks
 
     def has_assigned_trucks(self):
         return len(self._trucks) > 0
