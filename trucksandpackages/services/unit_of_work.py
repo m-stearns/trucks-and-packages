@@ -1,6 +1,7 @@
 from google.cloud import datastore
 
 from trucksandpackages.repositories.truck_repository import TruckRepository
+from trucksandpackages.repositories.user_repository import UserRepository
 
 class DatastoreUnitOfWork:
 
@@ -11,6 +12,11 @@ class DatastoreUnitOfWork:
         self.client_session = datastore.Client()
         self.transaction = self.client_session.transaction()
         self.transaction.begin()
+        self.users = UserRepository(
+            self.client_session,
+            self.datastore,
+            self.transaction
+        )
         self.trucks = TruckRepository(
             self.client_session,
             self.datastore,
