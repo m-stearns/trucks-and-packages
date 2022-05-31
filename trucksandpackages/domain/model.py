@@ -1,15 +1,23 @@
-from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
-from typing import List
+from typing import List, Set
+
 
 class Package:
 
-    def __init__(self, shipping_type: str, weight: Decimal, shipping_date: date, package_id: str = None):
+    def __init__(
+        self,
+        shipping_type: str,
+        weight: Decimal,
+        shipping_date: date,
+        package_id: str = None,
+        carrier = None
+    ):
         self._shipping_type = shipping_type
         self._weight = weight
         self._shipping_date = shipping_date
         self._package_id = package_id
+        self._carrier = carrier
 
     @property
     def shipping_type(self) -> str:
@@ -43,6 +51,20 @@ class Package:
     def package_id(self, package_id):
         self._package_id = package_id
 
+    @property
+    def carrier(self):
+        return self._carrier
+
+    @carrier.setter
+    def carrier(self, new_carrier):
+        self._carrier = new_carrier
+
+    def __eq__(self, other_package) -> bool:
+        return self._package_id == other_package.package_id
+
+    def __hash__(self) -> int:
+        return hash(self._package_id)
+
 class Truck:
 
     def __init__(
@@ -52,14 +74,13 @@ class Truck:
         axles: int,
         truck_manager_id: str = None,
         truck_id: str = None,
-        packages: List[Package] = None
     ):
         self._truck_type = truck_type
         self._truck_length = truck_length
         self._axles = axles
         self._owner = truck_manager_id
         self._truck_id = truck_id
-        self._packages = packages
+        self._packages: Set[Package] = set()
 
     @property
     def truck_type(self) -> str:
@@ -109,12 +130,26 @@ class Truck:
     def packages(self, packages: List[Package]):
         self._packages = packages
 
+    def has_packages(self):
+        return len(self._packages) > 0
+
+    def assign_package(self, package):
+        if self._can_assign_package(package):
+            self._packages.add(package)
+
+    def _can_assign_package(self, package):
+        return package not in self._packages
+
+    def unassign_package(self, package):
+        if package in self._packages:
+            self._packages.remove(package)
+
 
 class User:
 
     def __init__(self, user_id: str, trucks: List[Truck] = None):
         self._user_id = user_id
-        self._trucks = trucks
+        self._trucks: Set[Truck] = trucks
 
     @property
     def user_id(self) -> str:
@@ -124,10 +159,16 @@ class User:
     def user_id(self, user_id: str):
         self._user_id = user_id
 
-    @property
-    def trucks(self) -> List[Truck]:
-        return self._trucks
+    def has_assigned_trucks(self):
+        return len(self._trucks) > 0
 
-    @trucks.setter
-    def trucks(self, trucks: List[Truck]):
-        self._trucks = trucks
+    def assign_truck(self, truck: Truck):
+        if self._can_assign_truck(truck):
+            self._trucks.add(truck)
+
+    def _can_assign_truck(self, truck: Truck):
+        return truck not in self._trucks
+
+    def unassign_truck(self, truck):
+        if truck in self._trucks:
+            self._trucks.remove(truck)
