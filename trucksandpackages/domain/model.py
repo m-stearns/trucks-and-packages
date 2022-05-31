@@ -1,6 +1,6 @@
 from datetime import date
 from decimal import Decimal
-from typing import List, Set
+from typing import Set
 
 
 class Package:
@@ -11,13 +11,13 @@ class Package:
         weight: Decimal,
         shipping_date: date,
         package_id: str = None,
-        carrier = None
+        carrier_id: str = None
     ):
         self._shipping_type = shipping_type
         self._weight = weight
         self._shipping_date = shipping_date
         self._package_id = package_id
-        self._carrier = carrier
+        self._carrier_id = carrier_id
 
     @property
     def shipping_type(self) -> str:
@@ -52,12 +52,12 @@ class Package:
         self._package_id = package_id
 
     @property
-    def carrier(self):
-        return self._carrier
+    def carrier_id(self):
+        return self._carrier_id
 
-    @carrier.setter
-    def carrier(self, new_carrier):
-        self._carrier = new_carrier
+    @carrier_id.setter
+    def carrier_id(self, new_carrier_id):
+        self._carrier_id = new_carrier_id
 
     def __eq__(self, other_package) -> bool:
         return self._package_id == other_package.package_id
@@ -72,15 +72,15 @@ class Truck:
         truck_type: str,
         truck_length: int,
         axles: int,
-        truck_manager_id: str = None,
+        owner: str,
         truck_id: str = None,
     ):
         self._truck_type = truck_type
         self._truck_length = truck_length
         self._axles = axles
-        self._owner = truck_manager_id
+        self._owner = owner
         self._truck_id = truck_id
-        self._packages: Set[Package] = set()
+        self._package_ids: Set[str] = set()
 
     @property
     def truck_type(self) -> str:
@@ -119,30 +119,26 @@ class Truck:
         return self._owner
 
     @owner.setter
-    def owner(self, user_id: str):
-        self.owner = user_id
+    def owner(self, auth_id: str):
+        self.owner = auth_id
 
     @property
-    def packages(self) -> List[Package]:
-        return self._packages
-    
-    @packages.setter
-    def packages(self, packages: List[Package]):
-        self._packages = packages
+    def package_ids(self) -> Set[str]:
+        return self._package_ids
 
     def has_packages(self):
-        return len(self._packages) > 0
+        return len(self._package_ids) > 0
 
-    def assign_package(self, package):
-        if self._can_assign_package(package):
-            self._packages.add(package)
+    def assign_package_id(self, package_id: str):
+        if self._can_assign_package_id(package_id):
+            self._package_ids.add(package_id)
 
-    def _can_assign_package(self, package):
-        return package not in self._packages
+    def _can_assign_package_id(self, package_id: str):
+        return package_id not in self._package_ids
 
-    def unassign_package(self, package):
-        if package in self._packages:
-            self._packages.remove(package)
+    def unassign_package_id(self, package_id: str):
+        if package_id in self._package_ids:
+            self._package_ids.remove(package_id)
 
 
 class User:
@@ -154,7 +150,7 @@ class User:
     ):
         self._auth_id = auth_id
         self._user_id = user_id
-        self._trucks: Set[Truck] = set()
+        self._truck_ids: Set[str] = set()
 
     @property
     def auth_id(self) -> str:
@@ -173,23 +169,19 @@ class User:
         self._user_id = user_id
 
     @property
-    def trucks(self) -> Set[Truck]:
-        return self._trucks
-
-    @trucks.setter
-    def trucks(self, trucks: Set[Truck]):
-        self._trucks = trucks
+    def truck_ids(self) -> Set[str]:
+        return self._truck_ids
 
     def has_assigned_trucks(self):
-        return len(self._trucks) > 0
+        return len(self._truck_ids) > 0
 
-    def assign_truck(self, truck: Truck):
-        if self._can_assign_truck(truck):
-            self._trucks.add(truck)
+    def assign_truck(self, truck_id: str):
+        if self._can_assign_truck_id(truck_id):
+            self._truck_ids.add(truck_id)
 
-    def _can_assign_truck(self, truck: Truck):
-        return truck not in self._trucks
+    def _can_assign_truck_id(self, truck_id: str):
+        return truck_id not in self._truck_ids
 
-    def unassign_truck(self, truck):
-        if truck in self._trucks:
-            self._trucks.remove(truck)
+    def unassign_truck(self, truck_id: str):
+        if truck_id in self._truck_ids:
+            self._truck_ids.remove(truck_id)
