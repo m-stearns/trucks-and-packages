@@ -40,8 +40,8 @@ class UserRepository(AbstractRepository):
             "trucks": []
         })
         if user.has_assigned_trucks():
-            for truck in user.trucks:
-                entity["trucks"].append(truck.truck_id)
+            for truck_id in user.truck_ids:
+                entity["trucks"].append(truck_id)
         
         self._transaction.put(entity)
         self._added_entity = entity
@@ -55,9 +55,7 @@ class UserRepository(AbstractRepository):
                 user_id=result.key.id
             )
             for truck_id in result["trucks"]:
-                truck = self.__get_truck_by_id(truck_id)
-                truck.owner = user.user_id
-                user.assign_truck(truck)
+                user.assign_truck(truck_id)
             return user
         else:
             return None
@@ -72,25 +70,9 @@ class UserRepository(AbstractRepository):
                 user_id=item.key.id
             )
             for truck_id in item["trucks"]:
-                truck = self.__get_truck_by_id(truck_id)
-                truck.owner = user.user_id
-                user.assign_truck(truck)
+                user.assign_truck(truck_id)
             users.append(user)
         return users
 
     def remove(self):
         pass
-        
-    def __get_truck_by_id(self, truck_id: str) -> model.Truck:
-        key = self.client_session.key("trucks", int(truck_id))
-        result = self.client_session.get(key=key)
-        if result:
-            truck = model.Truck(
-                truck_type=result["type"],
-                truck_length=result["length"],
-                axles=result["axles"],
-                truck_manager_id=result["owner"],
-                truck_id=result.key.id
-            )
-            return truck
-        return None

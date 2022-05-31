@@ -45,7 +45,6 @@ class TruckRepository(AbstractRepository):
 
 
     def get(self, truck_id: str):
-        
         key = self._client_session.key("trucks", int(truck_id))
         result = self._client_session.get(key=key)
         if result:
@@ -53,13 +52,11 @@ class TruckRepository(AbstractRepository):
                 truck_type=result["type"],
                 truck_length=result["length"],
                 axles=result["axles"],
-                truck_manager_id=result["owner"],
+                owner=result["owner"],
                 truck_id=result.key.id
             )
             for package_id in result["packages"]:
-                package = self.__get_package_by_id(package_id)
-                package.carrier = truck
-                truck.assign_package(package)
+                truck.assign_package_id(package_id)
             return truck
         else:
             return None
@@ -69,17 +66,3 @@ class TruckRepository(AbstractRepository):
 
     def remove(self):
         pass
-
-    def __get_package_by_id(self, package_id: str) -> model.Package:
-        key = self.client_session.key("packages", int(package_id))
-        result = self.client_session.get(key=key)
-        if result:
-            package = model.Package(
-                shipping_type=result["shipping_type"],
-                weight=result["weight"],
-                shipping_date=result["shipping_date"],
-                package_id=result.key.id
-            )
-            return package
-        return None
-        
