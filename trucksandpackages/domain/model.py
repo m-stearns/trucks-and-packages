@@ -50,7 +50,6 @@ class Truck:
         truck_type: str,
         truck_length: int,
         axles: int,
-        max_weight_capacity: int,
         truck_manager_id: str = None,
         truck_id: str = None,
         packages: List[Package] = None
@@ -58,7 +57,6 @@ class Truck:
         self._truck_type = truck_type
         self._truck_length = truck_length
         self._axles = axles
-        self._max_weight_capacity = max_weight_capacity
         self._owner = truck_manager_id
         self._truck_id = truck_id
         self._packages = packages
@@ -86,14 +84,6 @@ class Truck:
     @axles.setter
     def axles(self, axles: int):
         self._axles = axles
-    
-    @property
-    def max_weight_capacity(self) -> int:
-        return self._max_weight_capacity
-
-    @max_weight_capacity.setter
-    def max_weight_capacity(self, max_weight_capacity: int):
-        self._max_weight_capacity = max_weight_capacity
 
     @property
     def truck_id(self) -> str:
