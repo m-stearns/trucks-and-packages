@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, make_response, request
 
 from trucksandpackages import auth, exceptions
 from trucksandpackages.services import services, unit_of_work
+from trucksandpackages import common
 
 bp = Blueprint("trucks", __name__, url_prefix="/trucks")
 
@@ -23,11 +24,22 @@ def create_truck():
             response_401_error.status_code = e.status_code
             return response_401_error
 
+        response_415_error = common.check_for_content_type_error_415(request)
+        if response_415_error:
+            return response_415_error
+
+        response_406_error = common.check_for_accept_error_406(
+            request, ["application/json"]
+        )
+        if response_406_error:
+            return response_406_error
+
         json_data = request.get_json()
         if not has_required_values_for_create_truck(json_data):
             response_400_error = make_response(
                 jsonify({
-                "Error": "The request object is missing at least one of the required attributes"
+                "Error": "The request object is missing at least one of the \
+                    required attributes"
                 })
             )
             response_400_error.status_code = 400
