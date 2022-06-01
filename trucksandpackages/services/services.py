@@ -1,7 +1,10 @@
+from datetime import date
+from decimal import Decimal
 from typing import List
 
-from trucksandpackages.services.unit_of_work import DatastoreUnitOfWork
 from trucksandpackages.domain import model
+from trucksandpackages.services.unit_of_work import DatastoreUnitOfWork
+
 
 def create_truck_manager(auth_id: str, unit_of_work: DatastoreUnitOfWork):
     with unit_of_work:
@@ -89,3 +92,18 @@ def get_trucks(
             query_limit, query_offset
         )
         return (trucks, next_page_available)
+
+def create_package(
+    shipping_type: str,
+    weight: Decimal,
+    shipping_date: date,
+    unit_of_work: DatastoreUnitOfWork
+) -> str:
+    with unit_of_work:
+        new_package = model.Package(
+            shipping_type, weight, shipping_date, carrier_id=None
+        )
+        unit_of_work.packages.add(new_package)
+        unit_of_work.commit()
+        package_id = unit_of_work.packages.id_of_added_entity
+        return package_id
