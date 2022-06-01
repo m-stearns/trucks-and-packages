@@ -78,3 +78,14 @@ def delete_truck(
     with unit_of_work:
         unit_of_work.trucks.remove(truck_id)
         unit_of_work.commit()
+
+def get_trucks(
+    query_limit: int,
+    query_offset: str,
+    unit_of_work: DatastoreUnitOfWork
+):
+    with unit_of_work:
+        trucks, next_page_available = unit_of_work.trucks.get_list(
+            query_limit, query_offset
+        )
+        return (trucks, next_page_available)

@@ -41,16 +41,16 @@ def contains_unallowed_attributes(json_data: dict) -> bool:
             return True
     return False
 
-@bp.route("", methods=["POST"])
+@bp.route("", methods=["POST", "GET"])
 def create_truck():
+    try:
+        payload = auth.verify_jwt(request)
+    except (exceptions.NoAuthHeaderError, exceptions.InvalidHeaderError) as e:
+        response_401_error = make_response(e.error)
+        response_401_error.status_code = e.status_code
+        return response_401_error
+    
     if request.method == "POST":
-        try:
-            payload = auth.verify_jwt(request)
-        except (exceptions.NoAuthHeaderError, exceptions.InvalidHeaderError) as e:
-            response_401_error = make_response(e.error)
-            response_401_error.status_code = e.status_code
-            return response_401_error
-
         response_415_error = common.check_for_content_type_error_415(request)
         if response_415_error:
             return response_415_error
@@ -93,6 +93,33 @@ def create_truck():
         )
         res.status_code = 201
         return res
+
+    if request.method == "GET":
+        response_406_error = common.check_for_accept_error_406(
+            request, ["application/json"]
+        )
+        if response_406_error:
+            return response_406_error
+
+        query_offset = int(request.args.get("offset", "0"))
+        query_limit = 5
+        trucks, next_page_available = services.get_trucks(
+            query_limit, query_offset, unit_of_work.DatastoreUnitOfWork()
+        )
+        response_200 = jsonify(
+            {
+                "trucks": [
+                    truck_to_dict(
+                        truck,
+                        f"{request.base_url}",
+                        create_list_of_package_dict(truck.package_ids, f"{request.host_url}packages")
+                    ) for truck in trucks
+                ],
+                "next": f"{request.base_url}?limit=5&offset={query_offset + query_limit}" if next_page_available else None
+            }
+        )
+        response_200.status_code = 200
+        return response_200
 
 
 @bp.route("/<truck_id>", methods=["GET", "PATCH", "PUT", "DELETE"])

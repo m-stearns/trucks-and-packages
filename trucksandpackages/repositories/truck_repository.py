@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 from google.cloud import datastore
 from trucksandpackages.domain import model
@@ -61,8 +61,29 @@ class TruckRepository(AbstractRepository):
         else:
             return None
 
-    def get_list(self):
-        pass
+    def get_list(self, limit: int, offset: int) -> Tuple[List[model.Truck], bool]:
+        query = self._client_session.query(kind="trucks")
+        query_iterator = query.fetch(limit=limit, offset=offset)
+        pages = query_iterator.pages
+        results = list(next(pages))
+        trucks = []
+        for item in results:
+            truck = model.Truck(
+                truck_type=item["type"],
+                truck_length=item["length"],
+                axles=item["axles"],
+                owner=item["owner"],
+                truck_id=item.key.id
+            )
+            for package_id in item["packages"]:
+                truck.assign_package_id(package_id)
+            trucks.append(truck)
+
+        if query_iterator.next_page_token:
+            next_page_available = True
+        else:
+            next_page_available = False
+        return (trucks, next_page_available)
 
     def remove(self, truck_id: str):
         truck_key = self._client_session.key("trucks", int(truck_id))
