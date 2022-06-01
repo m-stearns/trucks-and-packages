@@ -80,7 +80,7 @@ def create_truck():
         truck_id = services.create_truck(
             truck_type, length, axles, auth_id, unit_of_work.DatastoreUnitOfWork()
         )
-        res = make_response(
+        response_201 = make_response(
             jsonify({
                 "id": truck_id,
                 "type": truck_type,
@@ -91,8 +91,8 @@ def create_truck():
                 "self": f"{request.base_url}/{truck_id}"
             })
         )
-        res.status_code = 201
-        return res
+        response_201.status_code = 201
+        return response_201
 
     if request.method == "GET":
         response_406_error = common.check_for_accept_error_406(
