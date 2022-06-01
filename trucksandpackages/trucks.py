@@ -95,8 +95,8 @@ def create_truck():
         return res
 
 
-@bp.route("/<truck_id>", methods=["GET", "PATCH", "PUT"])
-def get_or_update_truck(truck_id: str):
+@bp.route("/<truck_id>", methods=["GET", "PATCH", "PUT", "DELETE"])
+def get_update_or_delete_truck(truck_id: str):
     if request.method == "GET":
         try:
             payload = auth.verify_jwt(request)
@@ -256,6 +256,45 @@ def get_or_update_truck(truck_id: str):
                 response_303.headers["Location"] = f"{request.host_url}/trucks/{truck_id}"
                 return response_303
 
+            else:
+                response_403_error = make_response()
+                response_403_error.status_code = 403
+                return response_403_error
+        else:
+            response_404_error = make_response(
+                jsonify({
+                    "Error": "No truck with this truck_id exists"
+                })
+            )
+            response_404_error.status_code = 404
+            return response_404_error
+
+    if request.method == "DELETE":
+        try:
+            payload = auth.verify_jwt(request)
+        except (exceptions.NoAuthHeaderError, exceptions.InvalidHeaderError) as e:
+            response_401_error = make_response(e.error)
+            response_401_error.status_code = e.status_code
+            return response_401_error
+
+        response_406_error = common.check_for_accept_error_406(
+            request, ["application/json"]
+        )
+        if response_406_error:
+            return response_406_error
+
+        auth_id = payload["sub"]
+        truck = services.get_truck(
+            truck_id, unit_of_work.DatastoreUnitOfWork()
+        )
+        if truck:
+            if truck.owner == auth_id:
+                services.delete_truck(
+                    truck_id, unit_of_work.DatastoreUnitOfWork()
+                )
+                response_200 = make_response()
+                response_200.status_code = 204
+                return response_200
             else:
                 response_403_error = make_response()
                 response_403_error.status_code = 403

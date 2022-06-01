@@ -70,3 +70,11 @@ def edit_truck(
             truck.package_ids = set()
         unit_of_work.trucks.add(truck)
         unit_of_work.commit()
+
+def delete_truck(
+    truck_id: str,
+    unit_of_work: DatastoreUnitOfWork
+):
+    with unit_of_work:
+        unit_of_work.trucks.remove(truck_id)
+        unit_of_work.commit()

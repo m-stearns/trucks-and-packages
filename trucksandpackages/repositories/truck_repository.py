@@ -64,5 +64,8 @@ class TruckRepository(AbstractRepository):
     def get_list(self):
         pass
 
-    def remove(self):
-        pass
+    def remove(self, truck_id: str):
+        truck_key = self._client_session.key("trucks", int(truck_id))
+        result = self._client_session.get(key=truck_key)
+        if result:
+            self._transaction.delete(truck_key)
