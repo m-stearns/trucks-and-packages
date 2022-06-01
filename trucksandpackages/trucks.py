@@ -124,14 +124,14 @@ def create_truck():
 
 @bp.route("/<truck_id>", methods=["GET", "PATCH", "PUT", "DELETE"])
 def get_update_or_delete_truck(truck_id: str):
-    if request.method == "GET":
-        try:
-            payload = auth.verify_jwt(request)
-        except (exceptions.NoAuthHeaderError, exceptions.InvalidHeaderError) as e:
-            response_401_error = make_response(e.error)
-            response_401_error.status_code = e.status_code
-            return response_401_error
+    try:
+        payload = auth.verify_jwt(request)
+    except (exceptions.NoAuthHeaderError, exceptions.InvalidHeaderError) as e:
+        response_401_error = make_response(e.error)
+        response_401_error.status_code = e.status_code
+        return response_401_error
 
+    if request.method == "GET":
         response_406_error = common.check_for_accept_error_406(
             request, ["application/json"]
         )
@@ -167,13 +167,6 @@ def get_update_or_delete_truck(truck_id: str):
             return response_200
     
     elif request.method == "PATCH":
-        try:
-            payload = auth.verify_jwt(request)
-        except (exceptions.NoAuthHeaderError, exceptions.InvalidHeaderError) as e:
-            response_401_error = make_response(e.error)
-            response_401_error.status_code = e.status_code
-            return response_401_error
-
         response_415_error = common.check_for_content_type_error_415(request)
         if response_415_error:
             return response_415_error
@@ -235,13 +228,6 @@ def get_update_or_delete_truck(truck_id: str):
             return response_404_error
 
     elif request.method == "PUT":
-        try:
-            payload = auth.verify_jwt(request)
-        except (exceptions.NoAuthHeaderError, exceptions.InvalidHeaderError) as e:
-            response_401_error = make_response(e.error)
-            response_401_error.status_code = e.status_code
-            return response_401_error
-
         response_415_error = common.check_for_content_type_error_415(request)
         if response_415_error:
             return response_415_error
@@ -297,13 +283,6 @@ def get_update_or_delete_truck(truck_id: str):
             return response_404_error
 
     if request.method == "DELETE":
-        try:
-            payload = auth.verify_jwt(request)
-        except (exceptions.NoAuthHeaderError, exceptions.InvalidHeaderError) as e:
-            response_401_error = make_response(e.error)
-            response_401_error.status_code = e.status_code
-            return response_401_error
-
         response_406_error = common.check_for_accept_error_406(
             request, ["application/json"]
         )
