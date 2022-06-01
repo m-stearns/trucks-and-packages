@@ -251,15 +251,11 @@ def get_or_update_truck(truck_id: str):
                     unit_of_work.DatastoreUnitOfWork(),
                     clear_package_ids=True,
                 )
-                response_200 = jsonify(
-                    truck_to_dict(
-                        truck,
-                        f"{request.base_url}",
-                        create_list_of_package_dict(truck.package_ids, f"{request.host_url}packages")
-                    )
-                )
-                response_200.status_code = 200
-                return response_200
+                response_303 = make_response()
+                response_303.status_code = 303
+                response_303.headers["Location"] = f"{request.host_url}/trucks/{truck_id}"
+                return response_303
+
             else:
                 response_403_error = make_response()
                 response_403_error.status_code = 403
