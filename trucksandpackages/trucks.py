@@ -298,9 +298,9 @@ def get_update_or_delete_truck(truck_id: str):
                 services.delete_truck(
                     truck_id, unit_of_work.DatastoreUnitOfWork()
                 )
-                response_200 = make_response()
-                response_200.status_code = 204
-                return response_200
+                response_204 = make_response()
+                response_204.status_code = 204
+                return response_204
             else:
                 response_403_error = make_response()
                 response_403_error.status_code = 403
