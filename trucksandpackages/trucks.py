@@ -314,7 +314,7 @@ def get_update_or_delete_truck(truck_id: str):
             response_404_error.status_code = 404
             return response_404_error
 
-@bp.route("<truck_id>/packages/<package_id>", methods=["PUT"])
+@bp.route("<truck_id>/packages/<package_id>", methods=["PUT", "DELETE"])
 def assign_package_to_truck(truck_id: str, package_id: str):
     try:
         payload = auth.verify_jwt(request)
@@ -358,6 +358,51 @@ def assign_package_to_truck(truck_id: str, package_id: str):
             response_204 = make_response()
             response_204.status_code = 204
             return response_204
+        else:
+            response_404_error = make_response(
+                jsonify({
+                    "Error": "The specified truck and/or package does not exist"
+                })
+            )
+            response_404_error.status_code = 404
+            return response_404_error
+
+    if request.method == "DELETE":
+        response_406_error = common.check_for_accept_error_406(
+            request, ["application/json"]
+        )
+        if response_406_error:
+            return response_406_error
+
+        truck = services.get_truck(
+            truck_id,
+            unit_of_work.DatastoreUnitOfWork()
+        )
+        package = services.get_package(
+            package_id,
+            unit_of_work.DatastoreUnitOfWork()
+        )
+        if truck and package:
+            if package.package_id in truck.package_ids:
+                truck.unassign_package_id(package.package_id)
+                package.carrier_id = None
+                services.edit_truck(
+                    truck, unit_of_work.DatastoreUnitOfWork()
+                )
+                services.edit_package(
+                    package, unit_of_work.DatastoreUnitOfWork()
+                )
+                response_204 = make_response()
+                response_204.status_code = 204
+                return response_204
+
+            else:
+                response_404_error = jsonify({
+                    "Error": \
+                        "No truck with this truck_id is loaded with the package with this package_id"
+                })
+                response_404_error.status_code = 404
+                return response_404_error
         else:
             response_404_error = make_response(
                 jsonify({
