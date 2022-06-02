@@ -1,4 +1,5 @@
 from typing import List, Tuple
+from datetime import datetime
 
 from google.cloud import datastore
 from trucksandpackages.domain import model
@@ -47,10 +48,13 @@ class PackageRepository(AbstractRepository):
         key = self._client_session.key("packages", int(package_id))
         result = self._client_session.get(key=key)
         if result:
+            shipping_date = datetime.strptime(
+                result["shipping_date"], "%Y-%m-%d"
+            )
             package = model.Package(
                 shipping_type=result["shipping_type"],
                 weight=result["weight"],
-                shipping_date=result["shipping_date"],
+                shipping_date=shipping_date,
                 carrier_id=result["carrier"],
                 package_id=result.key.id
             )

@@ -51,8 +51,6 @@ def get_truck(truck_id: str, unit_of_work: DatastoreUnitOfWork) -> model.Truck:
     with unit_of_work:
         truck = unit_of_work.trucks.get(truck_id)
         if truck:
-            if truck.has_packages():
-                pass
             return truck
         else:
             return None
@@ -118,3 +116,11 @@ def get_packages(
             query_limit, query_offset
         )
         return (packages, next_page_available)
+
+def get_package(package_id: str, unit_of_work: DatastoreUnitOfWork) -> model.Package:
+    with unit_of_work:
+        package = unit_of_work.packages.get(package_id)
+        if package:
+            return package
+        else:
+            return None

@@ -24,7 +24,7 @@ def package_to_dict(package: model.Package, self_link: str, carrier_dict: dict) 
         "id": package.package_id,
         "shipping_type": package.shipping_type,
         "weight": package.weight,
-        "shipping_date": package.shipping_date,
+        "shipping_date": package.shipping_date.strftime("%m/%d/%Y"),
         "carrier": carrier_dict,
         "self": self_link
     }
@@ -57,7 +57,7 @@ def create_package_or_get_packages():
                 "packages": [
                     package_to_dict(
                         package,
-                        f"{request.base_url}",
+                        f"{request.base_url}/{package.package_id}",
                         carrier_to_dict(package.carrier_id, f"{request.host_url}trucks")
                     ) for package in packages
                 ],
@@ -110,3 +110,34 @@ def create_package_or_get_packages():
         })
         response_201.status_code = 201
         return response_201
+
+@bp.route("/<package_id>", methods=["GET"])
+def get_package(package_id: str):
+    if request.method == "GET":
+        response_406_error = common.check_for_accept_error_406(
+            request, ["application/json"]
+        )
+        if response_406_error:
+            return response_406_error
+
+        package = services.get_package(
+            package_id, unit_of_work.DatastoreUnitOfWork()
+        )
+        if not package:
+            response_404_error = make_response(
+                jsonify({
+                    "Error": "No package with this package_id exists"
+                })
+            )
+            response_404_error.status_code = 404
+            return response_404_error
+        else:
+            response_200 = jsonify(
+                package_to_dict(
+                    package,
+                    f"{request.base_url}",
+                    carrier_to_dict(package.carrier_id, f"{request.host_url}trucks")
+                )
+            )
+            response_200.status_code = 200
+            return response_200
