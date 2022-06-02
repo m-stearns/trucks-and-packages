@@ -185,10 +185,10 @@ def get_edit_or_delete_package(package_id: str):
             
             services.edit_package(
                 package,
-                shipping_type,
-                weight,
-                shipping_date,
-                unit_of_work.DatastoreUnitOfWork()
+                shipping_type=shipping_type,
+                weight=weight,
+                shipping_date=shipping_date,
+                unit_of_work=unit_of_work.DatastoreUnitOfWork()
             )
             response_200 = jsonify(
                 package_to_dict(
@@ -240,10 +240,10 @@ def get_edit_or_delete_package(package_id: str):
             ).date()
             services.edit_package(
                 package,
-                shipping_type,
-                weight,
-                shipping_date,
-                unit_of_work.DatastoreUnitOfWork(),
+                shipping_type=shipping_type,
+                weight=weight,
+                shipping_date=shipping_date,
+                unit_of_work=unit_of_work.DatastoreUnitOfWork(),
                 clear_carrier=True,
             )
             response_303 = make_response()
