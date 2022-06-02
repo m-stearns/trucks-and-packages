@@ -117,7 +117,7 @@ def create_package_or_get_packages():
         response_201.status_code = 201
         return response_201
 
-@bp.route("/<package_id>", methods=["GET", "PATCH"])
+@bp.route("/<package_id>", methods=["GET", "PATCH", "PUT"])
 def get_package(package_id: str):
     if request.method == "GET":
         response_406_error = common.check_for_accept_error_406(
@@ -200,6 +200,56 @@ def get_package(package_id: str):
             response_200.status_code = 200
             return response_200
 
+        else:
+            response_404_error = make_response(
+                jsonify({
+                    "Error": "No package with this package_id exists"
+                })
+            )
+            response_404_error.status_code = 404
+            return response_404_error
+
+    elif request.method == "PUT":
+        response_415_error = common.check_for_content_type_error_415(request)
+        if response_415_error:
+            return response_415_error
+
+        response_406_error = common.check_for_accept_error_406(
+            request, ["application/json"]
+        )
+        if response_406_error:
+            return response_406_error
+
+        json_data = request.get_json()
+        if not json_data or not has_required_values_for_create_package(json_data) \
+            or contains_unallowed_attributes(json_data):
+            response_400_error = make_response({
+                "Error": "The request object is missing all of the required attributes"
+            })
+            response_400_error.status_code = 400
+            return response_400_error
+
+        package = services.get_package(
+            package_id, unit_of_work.DatastoreUnitOfWork()
+        )
+        if package:
+            shipping_type = json_data["shipping_type"]
+            weight = Decimal(str(json_data["weight"]))
+            shipping_date = datetime.datetime.strptime(
+                json_data["shipping_date"], "%m/%d/%Y"
+            ).date()
+            services.edit_package(
+                package,
+                shipping_type,
+                weight,
+                shipping_date,
+                unit_of_work.DatastoreUnitOfWork(),
+                clear_carrier=True,
+            )
+            response_303 = make_response()
+            response_303.status_code = 303
+            response_303.headers["Location"] = f"{request.host_url}packages/{package_id}"
+            return response_303
         else:
             response_404_error = make_response(
                 jsonify({
