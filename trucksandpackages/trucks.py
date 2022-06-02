@@ -266,7 +266,7 @@ def get_update_or_delete_truck(truck_id: str):
                 )
                 response_303 = make_response()
                 response_303.status_code = 303
-                response_303.headers["Location"] = f"{request.host_url}/trucks/{truck_id}"
+                response_303.headers["Location"] = f"{request.host_url}trucks/{truck_id}"
                 return response_303
 
             else:
