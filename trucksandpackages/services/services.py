@@ -57,10 +57,10 @@ def get_truck(truck_id: str, unit_of_work: DatastoreUnitOfWork) -> model.Truck:
 
 def edit_truck(
     truck: model.Truck,
-    truck_type: str,
-    truck_length: int,
-    axles: int,
     unit_of_work: DatastoreUnitOfWork,
+    truck_type: str = None,
+    truck_length: int = None,
+    axles: int = None,
     clear_package_ids: bool = False,
 ):
     with unit_of_work:
@@ -127,10 +127,10 @@ def get_package(package_id: str, unit_of_work: DatastoreUnitOfWork) -> model.Pac
 
 def edit_package(
     package: model.Package,
-    shipping_type: str,
-    weight: Decimal,
-    shipping_date: date,
     unit_of_work: DatastoreUnitOfWork,
+    shipping_type: str = None,
+    weight: Decimal = None,
+    shipping_date: date = None,
     clear_carrier: bool = False,
 ):
     with unit_of_work:

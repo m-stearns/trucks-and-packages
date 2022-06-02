@@ -40,6 +40,10 @@ class TruckRepository(AbstractRepository):
             "owner": truck.owner,
             "packages": [],
         })
+        if truck.has_packages():
+            for package_id in truck.package_ids:
+                entity["packages"].append(package_id)
+
         self._transaction.put(entity)
         self._added_entity = entity
 

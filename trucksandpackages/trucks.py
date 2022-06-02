@@ -198,10 +198,10 @@ def get_update_or_delete_truck(truck_id: str):
                 axles = json_data.get("axles", None)
                 services.edit_truck(
                     truck,
-                    truck_type,
-                    truck_length,
-                    axles,
-                    unit_of_work.DatastoreUnitOfWork()
+                    truck_type=truck_type,
+                    truck_length=truck_length,
+                    axles=axles,
+                    unit_of_work=unit_of_work.DatastoreUnitOfWork()
                 )
                 response_200 = jsonify(
                     truck_to_dict(
@@ -258,10 +258,10 @@ def get_update_or_delete_truck(truck_id: str):
                 axles = json_data["axles"]
                 services.edit_truck(
                     truck,
-                    truck_type,
-                    length,
-                    axles,
-                    unit_of_work.DatastoreUnitOfWork(),
+                    truck_type=truck_type,
+                    truck_length=truck_length,
+                    axles=axles,
+                    unit_of_work=unit_of_work.DatastoreUnitOfWork(),
                     clear_package_ids=True,
                 )
                 response_303 = make_response()
@@ -309,6 +309,59 @@ def get_update_or_delete_truck(truck_id: str):
             response_404_error = make_response(
                 jsonify({
                     "Error": "No truck with this truck_id exists"
+                })
+            )
+            response_404_error.status_code = 404
+            return response_404_error
+
+@bp.route("<truck_id>/packages/<package_id>", methods=["PUT"])
+def assign_package_to_truck(truck_id: str, package_id: str):
+    try:
+        payload = auth.verify_jwt(request)
+    except (exceptions.NoAuthHeaderError, exceptions.InvalidHeaderError) as e:
+        response_401_error = make_response(e.error)
+        response_401_error.status_code = e.status_code
+        return response_401_error
+
+    if request.method == "PUT":
+        response_406_error = common.check_for_accept_error_406(
+            request, ["application/json"]
+        )
+        if response_406_error:
+            return response_406_error
+
+        truck = services.get_truck(
+            truck_id,
+            unit_of_work.DatastoreUnitOfWork()
+        )
+        package = services.get_package(
+            package_id,
+            unit_of_work.DatastoreUnitOfWork()
+        )
+        if truck and package:
+            if package.carrier_id:
+                response_403_error = jsonify({
+                    "Error": "The package is already loaded on another truck"
+                })
+                response_403_error.status_code = 403
+                return response_403_error
+                
+            truck.assign_package_id(package.package_id)
+            package.carrier_id = truck.truck_id
+            services.edit_truck(
+                truck, unit_of_work.DatastoreUnitOfWork()
+            )
+            services.edit_package(
+                package, unit_of_work.DatastoreUnitOfWork()
+            )
+
+            response_204 = make_response()
+            response_204.status_code = 204
+            return response_204
+        else:
+            response_404_error = make_response(
+                jsonify({
+                    "Error": "The specified truck and/or package does not exist"
                 })
             )
             response_404_error.status_code = 404
