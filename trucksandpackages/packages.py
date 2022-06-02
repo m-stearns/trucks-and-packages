@@ -1,4 +1,5 @@
 
+from calendar import c
 import datetime
 from decimal import Decimal
 
@@ -18,10 +19,54 @@ def has_required_values_for_create_package(json_data: dict):
             return False
     return True
 
+def package_to_dict(package: model.Package, self_link: str, carrier_dict: dict) -> dict:
+    return {
+        "id": package.package_id,
+        "shipping_type": package.shipping_type,
+        "weight": package.weight,
+        "shipping_date": package.shipping_date,
+        "carrier": carrier_dict,
+        "self": self_link
+    }
+
+def carrier_to_dict(carrier_id: str, host_url: str) -> dict:
+    if carrier_id:
+        return {
+            "id": carrier_id,
+            "self": f"{host_url}/{carrier_id}"
+        }
+    else:
+        return None
+
 @bp.route("", methods=["GET", "POST"])
-def get_package():
+def create_package_or_get_packages():
     if request.method == "GET":
-        return "OK", 200
+        response_406_error = common.check_for_accept_error_406(
+            request, ["application/json"]
+        )
+        if response_406_error:
+            return response_406_error
+
+        query_offset = int(request.args.get("offset", "0"))
+        query_limit = 5
+        packages, next_page_available = services.get_packages(
+            query_limit, query_offset, unit_of_work.DatastoreUnitOfWork()
+        )
+        response_200 = jsonify(
+            {
+                "packages": [
+                    package_to_dict(
+                        package,
+                        f"{request.base_url}",
+                        carrier_to_dict(package.carrier_id, f"{request.host_url}trucks")
+                    ) for package in packages
+                ],
+                "next": f"{request.base_url}?limit=5&offset={query_offset + query_limit}" if next_page_available else None
+            }
+        )
+        response_200.status_code = 200
+        return response_200
+        
     if request.method == "POST":
         response_415_error = common.check_for_content_type_error_415(request)
         if response_415_error:

@@ -66,7 +66,7 @@ class PackageRepository(AbstractRepository):
         packages = []
         for item in results:
             packages.append(
-                package = model.Package(
+                model.Package(
                     shipping_type=item["shipping_type"],
                     weight=item["weight"],
                     shipping_date=item["shipping_date"],

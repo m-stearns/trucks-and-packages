@@ -107,3 +107,14 @@ def create_package(
         unit_of_work.commit()
         package_id = unit_of_work.packages.id_of_added_entity
         return package_id
+
+def get_packages(
+    query_limit: int,
+    query_offset: str,
+    unit_of_work: DatastoreUnitOfWork
+):
+    with unit_of_work:
+        packages, next_page_available = unit_of_work.packages.get_list(
+            query_limit, query_offset
+        )
+        return (packages, next_page_available)
