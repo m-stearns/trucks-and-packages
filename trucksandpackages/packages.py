@@ -117,8 +117,8 @@ def create_package_or_get_packages():
         response_201.status_code = 201
         return response_201
 
-@bp.route("/<package_id>", methods=["GET", "PATCH", "PUT"])
-def get_package(package_id: str):
+@bp.route("/<package_id>", methods=["GET", "PATCH", "PUT", "DELETE"])
+def get_edit_or_delete_package(package_id: str):
     if request.method == "GET":
         response_406_error = common.check_for_accept_error_406(
             request, ["application/json"]
@@ -250,6 +250,35 @@ def get_package(package_id: str):
             response_303.status_code = 303
             response_303.headers["Location"] = f"{request.host_url}packages/{package_id}"
             return response_303
+        else:
+            response_404_error = make_response(
+                jsonify({
+                    "Error": "No package with this package_id exists"
+                })
+            )
+            response_404_error.status_code = 404
+            return response_404_error
+
+    elif request.method == "DELETE":
+        response_406_error = common.check_for_accept_error_406(
+            request, ["application/json"]
+        )
+        if response_406_error:
+            return response_406_error
+
+        package = services.get_package(
+            package_id, unit_of_work.DatastoreUnitOfWork()
+        )
+        if package:
+            delete_successful = services.delete_package(
+                package_id, unit_of_work.DatastoreUnitOfWork()
+            )
+            if delete_successful:
+                response_204 = make_response()
+                response_204.status_code = 204
+                return response_204
+            else:
+                return "Oh no", 500
         else:
             response_404_error = make_response(
                 jsonify({

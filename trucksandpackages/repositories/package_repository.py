@@ -94,3 +94,4 @@ class PackageRepository(AbstractRepository):
         result = self._client_session.get(key=package_key)
         if result:
             self._transaction.delete(package_key)
+            self.id_of_deleted_entity = result.id

@@ -141,3 +141,15 @@ def edit_package(
             package.carrier_id = None
         unit_of_work.packages.add(package)
         unit_of_work.commit()
+
+def delete_package(
+    package_id: str,
+    unit_of_work: DatastoreUnitOfWork
+):
+    with unit_of_work:
+        unit_of_work.packages.remove(package_id)
+        unit_of_work.commit()
+        if unit_of_work.packages.id_of_deleted_entity:
+            return True
+        else:
+            return False
