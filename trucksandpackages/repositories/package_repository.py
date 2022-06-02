@@ -1,5 +1,6 @@
 from typing import List, Tuple
 from datetime import datetime
+from decimal import Decimal
 
 from google.cloud import datastore
 from trucksandpackages.domain import model
@@ -50,10 +51,10 @@ class PackageRepository(AbstractRepository):
         if result:
             shipping_date = datetime.strptime(
                 result["shipping_date"], "%Y-%m-%d"
-            )
+            ).date()
             package = model.Package(
                 shipping_type=result["shipping_type"],
-                weight=result["weight"],
+                weight=Decimal(result["weight"]),
                 shipping_date=shipping_date,
                 carrier_id=result["carrier"],
                 package_id=result.key.id
@@ -69,11 +70,14 @@ class PackageRepository(AbstractRepository):
         results = list(next(pages))
         packages = []
         for item in results:
+            shipping_date = datetime.strptime(
+                item["shipping_date"], "%Y-%m-%d"
+            ).date()
             packages.append(
                 model.Package(
                     shipping_type=item["shipping_type"],
-                    weight=item["weight"],
-                    shipping_date=item["shipping_date"],
+                    weight=Decimal(item["weight"]),
+                    shipping_date=shipping_date,
                     carrier_id=item["carrier"],
                     package_id=item.key.id
                 )

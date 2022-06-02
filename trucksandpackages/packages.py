@@ -38,6 +38,12 @@ def carrier_to_dict(carrier_id: str, host_url: str) -> dict:
     else:
         return None
 
+def contains_unallowed_attributes(json_data: dict) -> bool:
+    for key in json_data:
+        if key not in CREATE_PACKAGE_REQUIRED_VALUES:
+            return True
+    return False
+
 @bp.route("", methods=["GET", "POST"])
 def create_package_or_get_packages():
     if request.method == "GET":
@@ -111,7 +117,7 @@ def create_package_or_get_packages():
         response_201.status_code = 201
         return response_201
 
-@bp.route("/<package_id>", methods=["GET"])
+@bp.route("/<package_id>", methods=["GET", "PATCH"])
 def get_package(package_id: str):
     if request.method == "GET":
         response_406_error = common.check_for_accept_error_406(
@@ -141,3 +147,64 @@ def get_package(package_id: str):
             )
             response_200.status_code = 200
             return response_200
+
+    elif request.method == "PATCH":
+        response_415_error = common.check_for_content_type_error_415(request)
+        if response_415_error:
+            return response_415_error
+
+        response_406_error = common.check_for_accept_error_406(
+            request, ["application/json"]
+        )
+        if response_406_error:
+            return response_406_error
+
+        json_data = request.get_json()
+        if not json_data or contains_unallowed_attributes(json_data):
+            response_400_error = make_response({
+                "Error": "The request object is missing at least one of the \
+                    required attributes"
+            })
+            response_400_error.status_code = 400
+            response_400_error.headers.set(
+                "Content-Type", "application/json"
+            )
+            return response_400_error
+        
+        package = services.get_package(package_id, unit_of_work.DatastoreUnitOfWork())
+        if package:
+            shipping_type = json_data.get("shipping_type", None)
+            weight = json_data.get("weight", None)
+            if weight:
+                weight = Decimal(str(json_data["weight"]))
+            shipping_date = json_data.get("shipping_date", None)
+            if shipping_date:
+                shipping_date = datetime.datetime.strptime(
+                    json_data["shipping_date"], "%m/%d/%Y"
+                ).date()
+            
+            services.edit_package(
+                package,
+                shipping_type,
+                weight,
+                shipping_date,
+                unit_of_work.DatastoreUnitOfWork()
+            )
+            response_200 = jsonify(
+                package_to_dict(
+                    package,
+                    f"{request.base_url}",
+                    carrier_to_dict(package.carrier_id, f"{request.host_url}trucks")
+                )
+            )
+            response_200.status_code = 200
+            return response_200
+
+        else:
+            response_404_error = make_response(
+                jsonify({
+                    "Error": "No package with this package_id exists"
+                })
+            )
+            response_404_error.status_code = 404
+            return response_404_error

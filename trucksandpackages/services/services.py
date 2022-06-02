@@ -124,3 +124,20 @@ def get_package(package_id: str, unit_of_work: DatastoreUnitOfWork) -> model.Pac
             return package
         else:
             return None
+
+def edit_package(
+    package: model.Package,
+    shipping_type: str,
+    weight: Decimal,
+    shipping_date: date,
+    unit_of_work: DatastoreUnitOfWork,
+    clear_carrier: bool = False,
+):
+    with unit_of_work:
+        package.shipping_type = shipping_type if shipping_type else package.shipping_type
+        package.weight = weight if weight else package.weight
+        package.shipping_date = shipping_date if shipping_date else package.shipping_date
+        if clear_carrier:
+            package.carrier_id = None
+        unit_of_work.packages.add(package)
+        unit_of_work.commit()
