@@ -180,8 +180,8 @@ def get_update_or_delete_truck(truck_id: str):
         json_data = request.get_json()
         if not json_data or contains_unallowed_attributes(json_data):
             response_400_error = make_response({
-                "Error": "The request object is missing at least one of the \
-                    required attributes"
+                "Error": \
+                    "The request object is missing at least one of the required attributes"
             })
             response_400_error.status_code = 400
             response_400_error.headers.set(
