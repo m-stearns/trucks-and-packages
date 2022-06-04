@@ -259,7 +259,7 @@ def get_update_or_delete_truck(truck_id: str):
                 services.edit_truck(
                     truck,
                     truck_type=truck_type,
-                    truck_length=truck_length,
+                    truck_length=length,
                     axles=axles,
                     unit_of_work=unit_of_work.DatastoreUnitOfWork(),
                     clear_package_ids=True,
