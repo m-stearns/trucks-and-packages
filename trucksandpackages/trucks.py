@@ -63,12 +63,10 @@ def create_truck():
 
         json_data = request.get_json()
         if not has_required_values_for_create_truck(json_data):
-            response_400_error = make_response(
-                jsonify({
-                    "Error": "The request object is missing at least one of the \
-                        required attributes"
-                })
-            )
+            response_400_error = jsonify({
+                "Error": \
+                    "The request object is missing at least one of the required attributes"
+            })
             response_400_error.status_code = 400
             return response_400_error
         
