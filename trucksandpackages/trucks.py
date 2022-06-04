@@ -322,6 +322,12 @@ def assign_package_to_truck(truck_id: str, package_id: str):
         return response_401_error
 
     if request.method == "PUT":
+        response_406_error = common.check_for_accept_error_406(
+            request, ["application/json"]
+        )
+        if response_406_error:
+            return response_406_error
+
         truck = services.get_truck(
             truck_id,
             unit_of_work.DatastoreUnitOfWork()
