@@ -382,6 +382,12 @@ def assign_package_to_truck(truck_id: str, package_id: str):
             unit_of_work.DatastoreUnitOfWork()
         )
         if truck and package:
+            auth_id = payload["sub"]
+            if truck.owner != auth_id:
+                response_403_error = make_response()
+                response_403_error.status_code = 403
+                return response_403_error
+            
             if package.package_id in truck.package_ids:
                 truck.unassign_package_id(package.package_id)
                 package.carrier_id = None
@@ -396,12 +402,12 @@ def assign_package_to_truck(truck_id: str, package_id: str):
                 return response_204
 
             else:
-                response_404_error = jsonify({
+                response_304_error = jsonify({
                     "Error": \
                         "No truck with this truck_id is loaded with the package with this package_id"
                 })
-                response_404_error.status_code = 404
-                return response_404_error
+                response_304_error.status_code = 304
+                return response_304_error
         else:
             response_404_error = make_response(
                 jsonify({
