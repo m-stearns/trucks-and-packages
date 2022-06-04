@@ -322,12 +322,6 @@ def assign_package_to_truck(truck_id: str, package_id: str):
         return response_401_error
 
     if request.method == "PUT":
-        response_406_error = common.check_for_accept_error_406(
-            request, ["application/json"]
-        )
-        if response_406_error:
-            return response_406_error
-
         truck = services.get_truck(
             truck_id,
             unit_of_work.DatastoreUnitOfWork()
@@ -336,13 +330,20 @@ def assign_package_to_truck(truck_id: str, package_id: str):
             package_id,
             unit_of_work.DatastoreUnitOfWork()
         )
+
         if truck and package:
-            if package.carrier_id:
-                response_403_error = jsonify({
-                    "Error": "The package is already loaded on another truck"
-                })
+            auth_id = payload["sub"]
+            if truck.owner != auth_id:
+                response_403_error = make_response()
                 response_403_error.status_code = 403
                 return response_403_error
+
+            if package.carrier_id and package.carrier_id != truck.truck_id:
+                response_304_error = jsonify({
+                    "Error": "The package is already loaded on another truck"
+                })
+                response_304_error.status_code = 304
+                return response_304_error
                 
             truck.assign_package_id(package.package_id)
             package.carrier_id = truck.truck_id
