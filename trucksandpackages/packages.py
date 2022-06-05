@@ -270,6 +270,13 @@ def get_edit_or_delete_package(package_id: str):
             package_id, unit_of_work.DatastoreUnitOfWork()
         )
         if package:
+            truck = services.get_truck(
+                package.carrier_id, unit_of_work.DatastoreUnitOfWork()
+            )
+            truck.unassign_package_id(package.package_id)
+            services.edit_truck(
+                truck, unit_of_work.DatastoreUnitOfWork()
+            )
             delete_successful = services.delete_package(
                 package_id, unit_of_work.DatastoreUnitOfWork()
             )
