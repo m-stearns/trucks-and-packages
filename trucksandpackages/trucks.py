@@ -293,6 +293,16 @@ def get_update_or_delete_truck(truck_id: str):
         )
         if truck:
             if truck.owner == auth_id:
+                if truck.has_packages():
+                    for package_id in truck.package_ids:
+                        package = services.get_package(
+                            package_id, unit_of_work.DatastoreUnitOfWork()
+                        )
+                        services.edit_package(
+                            package,
+                            unit_of_work.DatastoreUnitOfWork(),
+                            clear_carrier=True
+                        )
                 services.delete_truck(
                     truck_id, unit_of_work.DatastoreUnitOfWork()
                 )
