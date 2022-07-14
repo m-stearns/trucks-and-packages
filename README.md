@@ -1,1 +1,1 @@
-# cs-493-final-application
+# Trucks and Packages - a REST API supported by Google Cloud Platform (GCP)
