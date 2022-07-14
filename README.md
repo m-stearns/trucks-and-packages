@@ -87,6 +87,10 @@ Upon successful creation of the resource, you should see the following returned 
     "self": "https://xyz.appspot.com/trucks/1234"
 }
 ```
+### Domain Constraints
+Trucks can carry multiple packages, and packages can only be assigned to one truck. If a package needs to be reassigned to another truck, the package must first be unassigned from its current truck. If a package is already assigned to a truck and an attempt is made to assign the package to a different truck before unassignment, the user will receive a `304 Not Modified` response.
+
+If a package that's assigned to a truck is deleted, the package will also be removed from the truck. Conversely if a truck is deleted and that truck had assigned packages, those packages will be removed from that truck.
 
 ### Truck Data Model Spec
 - `id` (Integer): The id of the Truck. Datastore automatically generates it.
