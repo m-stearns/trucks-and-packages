@@ -1,4 +1,4 @@
-# Trucks and Packages - a REST API supported by Google Cloud Platform (GCP)
+# Trucks and Packages - a REST API supported by Google Cloud Platform (GCP) and Auth0
 ## Description
 The Trucks and Packages API allows users to act as managers of their own shipping and delivery service, by managing delivery trucks and the packages assigned to them. Truck Managers are first requested to authenticate themselves in order to receive an individualized token, which can then be used to create truck and package resources, view those resources, assign and unassign packages to specific trucks, and remove truck and package resources when they are no longer needed.
 
@@ -17,6 +17,16 @@ The stakeholder requirements indicated the Google Cloud Datastore was the requir
 Future changes would also include pytest supported unit tests for the inner domain and services core of the application, as well as Docker containerization.
 
 ## Installation
+### Prerequisites
+You'll need the following services turned on before you can run this app locally:
+1. A [Google Cloud Platform (GCP) project](https://console.cloud.google.com/projectselector2/home), including:
+    - Google App Engine with Cloud Build API ([click here for a simple quickstart tutorial](https://cloud.google.com/appengine/docs/standard/python3/create-app)).
+    - A Google Cloud Datastore tied to your GCP project
+2. Your own [Auth0 authentication and authorization application](https://auth0.com/), with the following items set:
+    - Application URIs (*Note: these are specific to only your development environment*):
+        - Callback URL: `http://localhost:8080/auth/callback`
+        - Logout URL: `http://localhost:8080`
+    - An username-password authentication database connected to your Auth0 app
 ### Local Development
 1. Clone the repository: `git clone https://github.com/MikeyBS1987/trucks-and-packages.git`
 2. Create a clean python virtual environment: `python -m venv venv`
@@ -34,9 +44,8 @@ AUTH0_CLIENT_SECRET={{ your Auth0 client secret }}
 ```
 8. To keep the client-side sessions secure, we'll need to generate a secret key and store it in `.env`, so it can be imported by our flask application. [As recommended by the Flask documentation](https://flask.palletsprojects.com/en/2.1.x/config/), in your command line type the following command: `python -c 'import secrets; print(secrets.token_hex())`. Copy the secret key from your command line and enter the following into `.env`: `SECRET_KEY={{ your secret key}}`
 8. In `.\trucksandpackages\__init__.py`, make sure the Flask app's configuration is set to use the Development configuration: `app.config.from_object(config.DevelopmentConfig())`
-9. **TODO - Google Cloud Installation instructions**
-10. Turn on the flask application: `python -m flask run`
-11. The application by default runs at the following URL, just type this into your browser and you'll be taken to the home page: `http://127.0.0.1:8080`
+9. Turn on the flask application: `python -m flask run`
+10. The application by default runs at the following URL, just type this into your browser and you'll be taken to the home page: `http://localhost:8080`
 
 ## How to Use Trucks and Packages API
 In order to use the API, you'll need to first register a new account. In the home page, click on "create an account", which is where you'll be routed to an Auth0 user authentication feature. Create your account by providing a valid email address and password. After logging in, you will be routed back to the home page with a rendered JWT Bearer token and your unique ID. You'll need the JWT Bearer token placed into the Authorization header of your HTTP requests in order to access many of the endpoints of the API.
@@ -92,3 +101,9 @@ Upon successful creation of the resource, you should see the following returned 
 - weight (Decimal): The weight of the package in lbs.
 - shipping_date (Date): The date the package was shipped (MM/DD/YYYY).
 - carrier (String): The truck_id that the package is assigned to.
+
+## Credits
+The architecture implementation for this project was inspired by [Architecture Patterns with Python](https://www.cosmicpython.com/) by Harry Percival and Bob Gregory. The concepts of Domain modeling, Repository pattern, a Service layer, and the Unit of Work pattern can all be found within the implementation of this project. You can read this great book for free at [https://cosmicpython.com](https://www.cosmicpython.com/) thanks to the Creative Commons License CC-BY-NC-ND.
+
+## License
+This project is licensed under the GNU General Public License v3.0.
