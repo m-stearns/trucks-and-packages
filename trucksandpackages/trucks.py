@@ -323,7 +323,7 @@ def get_update_or_delete_truck(truck_id: str):
             return response_404_error
 
 @bp.route("<truck_id>/packages/<package_id>", methods=["PUT", "DELETE"])
-def assign_package_to_truck(truck_id: str, package_id: str):
+def assign_or_unassign_package_to_truck(truck_id: str, package_id: str):
     try:
         payload = auth.verify_jwt(request)
     except (exceptions.NoAuthHeaderError, exceptions.InvalidHeaderError) as e:
