@@ -89,19 +89,19 @@ Upon successful creation of the resource, you should see the following returned 
 ```
 
 ### Truck Data Model Spec
-- id (Integer): The id of the Truck. Datastore automatically generates it.
-- type (String): Type of the Truck. E.g., Flatbed, Dry Van, Box, Tanker, etc.
-- length (Integer): The length of the Truck in feet.
-- axles (Integer): The number of axles on the Truck.
-- owner (String): The id of the TruckManager that owns this Truck.
-- packages (String[]): Stores all package_ids assigned to the specific Truck.
+- `id` (Integer): The id of the Truck. Datastore automatically generates it.
+- `type` (String): Type of the Truck. E.g., Flatbed, Dry Van, Box, Tanker, etc.
+- `length` (Integer): The length of the Truck in feet.
+- `axles` (Integer): The number of axles on the Truck.
+- `owner` (String): The id of the TruckManager that owns this Truck.
+- `packages` (String[]): Stores all package_ids assigned to the specific Truck.
 
 ### Package Data Model Spec
-- id (Integer): The id of the Truck. Datastore automatically generates it.
-- shipping_type (String): The type of shipping for the package. E.g., ground, same-day, overnight, etc.
-- weight (Decimal): The weight of the package in lbs.
-- shipping_date (Date): The date the package was shipped (MM/DD/YYYY).
-- carrier (String): The truck_id that the package is assigned to.
+- `id` (Integer): The id of the Truck. Datastore automatically generates it.
+- `shipping_type` (String): The type of shipping for the package. E.g., ground, same-day, overnight, etc.
+- `weight` (Decimal): The weight of the package in lbs.
+- `shipping_date` (Date): The date the package was shipped (MM/DD/YYYY).
+- `carrier` (String): The truck_id that the package is assigned to.
 
 ## Credits
 The architecture implementation for this project was inspired by [Architecture Patterns with Python](https://www.cosmicpython.com/) by Harry Percival and Bob Gregory. The concepts of Domain modeling, Repository pattern, a Service layer, and the Unit of Work pattern can all be found within the implementation of this project. You can read this great book for free at [https://cosmicpython.com](https://www.cosmicpython.com/) thanks to the Creative Commons License CC-BY-NC-ND.
