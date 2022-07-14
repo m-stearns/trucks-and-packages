@@ -12,9 +12,9 @@ The Trucks and Packages API allows users to act as managers of their own shippin
 7. Postman (for testing)
 
 ### Challenges and Future Changes
-The stakeholder requirements indicated the Google Cloud Datastore was the required persistence mechanism for the project. While this document-based style of persistence makes it easy to transform the document objects into JSON objects and they provide horizontal scaling, we ran into the infamous N + 1 query problem during implementation of this project. Although the project currently has very little users, if the user population were to increase with a parallel increase in truck and package resources, we would need to determine if it's possible to mitigate the N + 1 query problem with the Google Cloud Datastore or look into a different persistence solution entirely. In the meantime a workaround was implemented where if one object had a relation to another object, the first object will simply store the second object's ID as a string within a data structure rather than the object itself. As a result, only specific services would be responsible to determine whether or not the related objects would also be pulled when a query is made for the original object.
+The stakeholder requirements indicated the Google Cloud Datastore was the required persistence mechanism for the project. While this document-based style of persistence makes it easy to transform the document objects into JSON objects and it provides horizontal scaling, we ran into the N+1 query problem during implementation of this project as truck objects can contain multiple package objects, and truck manager objects can contain mulitple trucks. Although the project currently has very little users, if the user population were to increase with an assumed parallel increase in truck and package resources, we would need to determine if it's possible to mitigate the N+1 query problem with the Google Cloud Datastore or look into a different persistence solution entirely. In the meantime a workaround was implemented where if one object has a relation to another object, the first object will simply store the second object's ID as a string within a data structure rather than the object itself. As a result, only specific services will determine whether or not the related objects also need to be pulled when a query is made for the original object.
 
-Future changes would also include pytest supported unit tests for the inner domain and services core of the application, as well as Docker containerization.
+Future changes would also include pytest supported unit tests for the inner domain and services core of the application, as well as Docker containerization. In addition, we expect we will limit trucks to carry either a certain maximum number of packages or a certain max combined weight of packages in the future.
 
 ## Installation
 ### Prerequisites
@@ -58,6 +58,7 @@ From there, you can perform the following actions against the Truck and Package 
 - Viewing a specific package -> `GET /packages/:package_id`
 - Assign a package to a truck -> `PUT /trucks/:truck_id/packages/:package_id`
 - Remove a package from a truck -> `DELETE /trucks/:truck_id/packages/:package_id`
+- View all trucks (limits view to only trucks created by that owner, pagination implemented with hard limit of 5 trucks per page) -> `GET /trucks?offset=#`
 
 *Note: Each resource must be prefixed with the application URL; for local development use* `http://localhost:8080`
 
