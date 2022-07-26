@@ -1,4 +1,3 @@
-from pkg_resources import find_distributions
 from setuptools import setup, find_packages
 
 setup(
