@@ -1,4 +1,3 @@
-import re
 from flask import Blueprint, jsonify, request
 
 from trucksandpackages.domain import model
