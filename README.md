@@ -54,7 +54,7 @@ AUTH0_CLIENT_SECRET={{ your Auth0 client secret }}
 In order to use the API, you'll need to first register a new account. In the home page, click on "create an account", which is where you'll be routed to an Auth0 user authentication feature. Create your account by providing a valid email address and password.
 
 <kbd>
-    <img src="docs/images/auth0_login_page.PNG" alt="login page" title="Login">
+    <img src="docs/images/auth0_login_page.PNG" alt="login page" title="Login" style="max-width: 350px;">
 </kbd>
 
 After logging in, you will be routed back to the home page with a rendered JWT Bearer token and your unique ID. You'll need the JWT Bearer token placed into the Authorization header of your HTTP requests in order to access many of the endpoints of the API.
