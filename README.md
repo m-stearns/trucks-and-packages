@@ -46,6 +46,7 @@ AUTH0_CLIENT_SECRET={{ your Auth0 client secret }}
 8. In `.\trucksandpackages\__init__.py`, make sure the Flask app's configuration is set to use the Development configuration: `app.config.from_object(config.DevelopmentConfig())`
 9. Turn on the flask application: `python -m flask run`
 10. The application by default runs at the following URL, just type this into your browser and you'll be taken to the home page: `http://localhost:8080`
+<img src="docs/images/home.PNG" alt="home page" title="Home" style="border-style: solid;">
 
 ## How to Use Trucks and Packages API
 In order to use the API, you'll need to first register a new account. In the home page, click on "create an account", which is where you'll be routed to an Auth0 user authentication feature. Create your account by providing a valid email address and password. After logging in, you will be routed back to the home page with a rendered JWT Bearer token and your unique ID. You'll need the JWT Bearer token placed into the Authorization header of your HTTP requests in order to access many of the endpoints of the API.
